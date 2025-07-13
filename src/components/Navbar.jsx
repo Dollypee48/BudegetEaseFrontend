@@ -23,6 +23,14 @@ export default function NavBar() {
         </h1>
 
         <div className="space-x-4 text-sm flex items-center">
+          {/* About link - visible to all */}
+          <Link
+            to="/about"
+            className="hover:underline hover:text-white/90 transition"
+          >
+            About
+          </Link>
+
           {user ? (
             <>
               <span className="hidden sm:inline text-white/80">
