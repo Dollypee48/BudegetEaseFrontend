@@ -1,4 +1,3 @@
-
 import { createContext, useState, useEffect, useContext } from "react";
 import {
   getTransactions,
@@ -16,45 +15,49 @@ export function BudgetProvider({ children }) {
   const [income, setIncome] = useState(0);
   const [expenses, setExpenses] = useState(0);
 
-  
   useEffect(() => {
     if (user) {
       getTransactions()
-        .then((data) => setTransactions(data))
+        .then((data) => setTransactions(Array.isArray(data) ? data : []))
         .catch(console.error);
+    } else {
+      // Clear transactions when user logs out or no user
+      setTransactions([]);
     }
   }, [user]);
 
-  
   useEffect(() => {
+    if (!Array.isArray(transactions)) {
+      setIncome(0);
+      setExpenses(0);
+      return;
+    }
+
     const inc = transactions
       .filter((t) => t.type === "income")
-      .reduce((acc, t) => acc + +t.amount, 0);
+      .reduce((acc, t) => acc + Number(t.amount), 0);
 
     const exp = transactions
       .filter((t) => t.type === "expense")
-      .reduce((acc, t) => acc + +t.amount, 0);
+      .reduce((acc, t) => acc + Number(t.amount), 0);
 
     setIncome(inc);
     setExpenses(exp);
   }, [transactions]);
 
-  
   const addTransaction = async (txn) => {
     const newTxn = await addTxn(txn);
-    setTransactions([newTxn, ...transactions]);
+    setTransactions((prev) => [newTxn, ...prev]);
   };
 
-  
   const deleteTransaction = async (id) => {
     await delTxn(id);
-    setTransactions(transactions.filter((t) => t._id !== id));
+    setTransactions((prev) => prev.filter((t) => t._id !== id));
   };
 
-  
   const clearTransactions = async () => {
     await clearAllTransactions();
-    setTransactions([]); 
+    setTransactions([]);
   };
 
   return (
@@ -65,7 +68,7 @@ export function BudgetProvider({ children }) {
         expenses,
         addTransaction,
         deleteTransaction,
-        clearTransactions, 
+        clearTransactions,
       }}
     >
       {children}

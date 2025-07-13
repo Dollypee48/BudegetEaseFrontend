@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable"; // ✅ Must import as function for v3+
+import autoTable from "jspdf-autotable"; // ✅ Required for v3+
 import { BudgetContext } from "../context/BudgetContext";
 
 export default function PDFDownloader() {
@@ -9,22 +9,32 @@ export default function PDFDownloader() {
   const handleDownload = () => {
     const doc = new jsPDF();
 
+    // ✅ Ensure transactions is an array
+    const rows = Array.isArray(transactions)
+      ? transactions.map((txn) => [
+          txn.date || "-",
+          txn.category || "-",
+          txn.type ? txn.type.charAt(0).toUpperCase() + txn.type.slice(1) : "-",
+          `₦${Number(txn.amount || 0).toLocaleString()}`,
+        ])
+      : [];
+
     autoTable(doc, {
       head: [["Date", "Category", "Type", "Amount"]],
-      body: transactions.map((txn) => [
-        txn.date,
-        txn.category,
-        txn.type.charAt(0).toUpperCase() + txn.type.slice(1),
-        `₦${Number(txn.amount).toLocaleString()}`,
-      ]),
+      body: rows,
       startY: 25,
     });
 
     const finalY = doc.lastAutoTable?.finalY || 35;
     doc.setFontSize(14);
-    doc.text(`Total Income: ₦${Number(income).toLocaleString()}`, 14, finalY + 10);
-    doc.text(`Total Expenses: ₦${Number(expenses).toLocaleString()}`, 14, finalY + 17);
-    doc.text(`Balance: ₦${Number(income - expenses).toLocaleString()}`, 14, finalY + 24);
+
+    doc.text(`Total Income: ₦${Number(income || 0).toLocaleString()}`, 14, finalY + 10);
+    doc.text(`Total Expenses: ₦${Number(expenses || 0).toLocaleString()}`, 14, finalY + 17);
+    doc.text(
+      `Balance: ₦${Number((income || 0) - (expenses || 0)).toLocaleString()}`,
+      14,
+      finalY + 24
+    );
 
     doc.save("budget-report.pdf");
   };
@@ -33,7 +43,7 @@ export default function PDFDownloader() {
     <div className="text-right mt-4">
       <button
         onClick={handleDownload}
-        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
       >
         Download PDF
       </button>
