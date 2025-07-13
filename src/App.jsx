@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import About from "./components/About";
+import About from "./pages/About";
 
 
 <Route path="/about" element={<About />} />
