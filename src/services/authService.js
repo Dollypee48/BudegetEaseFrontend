@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://budget-ease-backend.vercel.app";
+const API_URL = "https://budget-ease-backend.vercel.app/api/auth"; 
 
 export const registerUser = async (userData) => {
   const res = await axios.post(`${API_URL}/register`, userData);
