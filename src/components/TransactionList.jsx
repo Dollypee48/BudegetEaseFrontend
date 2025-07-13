@@ -1,9 +1,14 @@
-// src/components/TransactionList.jsx
+
 import { useContext } from "react";
 import { BudgetContext } from "../context/BudgetContext";
 
 export default function TransactionList() {
   const { transactions, deleteTransaction } = useContext(BudgetContext);
+
+
+  console.log("transactions:", transactions);
+
+  const isTransactionsArray = Array.isArray(transactions);
 
   return (
     <div className="bg-white p-6 rounded shadow mb-6">
@@ -11,7 +16,7 @@ export default function TransactionList() {
         All Transactions
       </h2>
 
-      {transactions.length === 0 ? (
+      {!isTransactionsArray || transactions.length === 0 ? (
         <p className="text-gray-500">No transactions recorded yet.</p>
       ) : (
         <div className="overflow-x-auto">
@@ -32,16 +37,24 @@ export default function TransactionList() {
                   key={txn._id || index}
                   className="border-t hover:bg-gray-50"
                 >
-                  <td className="p-2">{new Date(txn.date).toLocaleDateString()}</td>
+                  <td className="p-2">
+                    {txn.date
+                      ? new Date(txn.date).toLocaleDateString()
+                      : "-"}
+                  </td>
                   <td
                     className={`p-2 capitalize font-medium ${
-                      txn.type === "income" ? "text-green-600" : "text-red-600"
+                      txn.type === "income"
+                        ? "text-green-600"
+                        : "text-red-600"
                     }`}
                   >
                     {txn.type}
                   </td>
                   <td className="p-2">{txn.category}</td>
-                  <td className="p-2">₦{Number(txn.amount).toLocaleString()}</td>
+                  <td className="p-2">
+                    ₦{Number(txn.amount || 0).toLocaleString()}
+                  </td>
                   <td className="p-2 break-words max-w-xs text-gray-600 italic">
                     {txn.description || "-"}
                   </td>
